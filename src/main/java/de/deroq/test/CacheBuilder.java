@@ -8,7 +8,9 @@ import java.util.concurrent.TimeUnit;
  */
 public final class CacheBuilder<K, V> {
 
-    protected WriteExpiry writeExpiry;
+    protected boolean expireAfterWrite = false;
+    protected int expireAfterWriteTime;
+    protected TimeUnit expireAfterWriteTimeUnit;
 
     private CacheBuilder() {}
 
@@ -17,7 +19,9 @@ public final class CacheBuilder<K, V> {
     }
 
     public CacheBuilder<Object, Object> expireAfterWrite(int time, TimeUnit timeUnit) {
-        this.writeExpiry = new WriteExpiry(time, timeUnit);
+        this.expireAfterWrite = true;
+        this.expireAfterWriteTime = time;
+        this.expireAfterWriteTimeUnit = timeUnit;
         return (CacheBuilder<Object, Object>) this;
     }
 
@@ -25,22 +29,7 @@ public final class CacheBuilder<K, V> {
         return (Cache<K1, V1>) new LocalCache<>(this);
     }
 
-    protected class WriteExpiry {
-
-        private final int time;
-        private final TimeUnit timeUnit;
-
-        public WriteExpiry(int time, TimeUnit timeUnit) {
-            this.time = time;
-            this.timeUnit = timeUnit;
-        }
-
-        public int getTime() {
-            return time;
-        }
-
-        public TimeUnit getTimeUnit() {
-            return timeUnit;
-        }
+    public <K1 extends K, V1 extends V> LoadingCache<K1, V1> build(CacheLoader<? super K1, V1> cacheLoader) {
+        return (LoadingCache<K1, V1>) new LocalLoadingCache<>(this, cacheLoader);
     }
 }

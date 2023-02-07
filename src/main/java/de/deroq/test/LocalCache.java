@@ -11,18 +11,20 @@ import java.util.concurrent.TimeUnit;
  */
 public class LocalCache<K, V> implements Cache<K, V> {
 
-    private final int MAX_CAPACITY = 10000;
+    protected final int MAX_CAPACITY = 10000;
     private final Node<K, V>[] table = new Node[MAX_CAPACITY];
     private final Set<Entry<K, V>> entrySet = new HashSet<>();
 
+    private boolean expireAfterWrite = false;
     private int writeExpiryTime;
     private TimeUnit writeExpiryTimeUnit;
     private ScheduledExecutorService writeExpiryService;
 
     public LocalCache(CacheBuilder<K, V> builder) {
-        if (builder.writeExpiry != null) {
-            this.writeExpiryTime = builder.writeExpiry.getTime();
-            this.writeExpiryTimeUnit = builder.writeExpiry.getTimeUnit();
+        if (builder.expireAfterWrite) {
+            this.expireAfterWrite = true;
+            this.writeExpiryTime = builder.expireAfterWriteTime;
+            this.writeExpiryTimeUnit = builder.expireAfterWriteTimeUnit;
             this.writeExpiryService = Executors.newScheduledThreadPool(1);
         }
     }
@@ -64,7 +66,7 @@ public class LocalCache<K, V> implements Cache<K, V> {
 
         entrySet.add(node);
 
-        if (writeExpiryService != null) {
+        if (expireAfterWrite) {
             writeExpiryService.schedule(() -> invalidate(k), writeExpiryTime, writeExpiryTimeUnit);
         }
 
@@ -258,7 +260,7 @@ public class LocalCache<K, V> implements Cache<K, V> {
         return set;
     }
 
-    private int hash(Object key) {
+    protected int hash(Object key) {
         return Math.abs(key.hashCode()) % MAX_CAPACITY;
     }
 
