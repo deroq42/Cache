@@ -22,7 +22,7 @@ public final class CacheBuilder<K, V> {
     }
 
     public <K1 extends K, V1 extends V> Cache<K1, V1> build() {
-        return (Cache<K1, V1>) new LocaleCache<>(this);
+        return (Cache<K1, V1>) new LocalCache<>(this);
     }
 
     protected class WriteExpiry {

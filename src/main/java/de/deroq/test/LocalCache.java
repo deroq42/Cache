@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
  * @author Miles
  * @since 05.02.2023
  */
-public class LocaleCache<K, V> implements Cache<K, V> {
+public class LocalCache<K, V> implements Cache<K, V> {
 
     private final int MAX_CAPACITY = 10000;
     private final Node<K, V>[] table = new Node[MAX_CAPACITY];
@@ -19,7 +19,7 @@ public class LocaleCache<K, V> implements Cache<K, V> {
     private TimeUnit writeExpiryTimeUnit;
     private ScheduledExecutorService writeExpiryService;
 
-    public LocaleCache(CacheBuilder<K, V> builder) {
+    public LocalCache(CacheBuilder<K, V> builder) {
         if (builder.writeExpiry != null) {
             this.writeExpiryTime = builder.writeExpiry.getTime();
             this.writeExpiryTimeUnit = builder.writeExpiry.getTimeUnit();
@@ -168,7 +168,17 @@ public class LocaleCache<K, V> implements Cache<K, V> {
 
     @Override
     public boolean containsKey(K k) {
-        return keys().contains(k);
+        final int hash = hash(k);
+        if (table[hash] == null) {
+            return false;
+        }
+
+        Node<K, V> node = table[hash];
+        if (!node.getKey().equals(k)) {
+            return false;
+        }
+
+        return true;
     }
 
     @Override
