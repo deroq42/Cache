@@ -1,5 +1,3 @@
-package de.deroq.test;
-
 /**
  * @author Miles
  * @since 07.02.2023

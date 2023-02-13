@@ -1,5 +1,3 @@
-package de.deroq.test;
-
 import java.util.Collection;
 import java.util.Set;
 
